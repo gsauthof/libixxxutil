@@ -29,10 +29,11 @@ namespace ixxx {
 
         FD &operator=(const FD&) =delete;
         FD &operator=(FD &&o);
+        operator int() const;
 
         void reset();
         int release();
-        int get();
+        int get() const;
     };
 
     class File {
@@ -50,10 +51,11 @@ namespace ixxx {
 
         File &operator=(const File &) =delete;
         File &operator=(File &&o);
+        operator FILE*() const;
 
         void reset();
         FILE *release();
-        FILE *get();
+        FILE *get() const;
     };
 
 

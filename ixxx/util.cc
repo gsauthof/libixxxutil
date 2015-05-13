@@ -65,6 +65,10 @@ namespace ixxx {
       o.fd_ = -1;
       return *this;
     }
+    FD::operator int() const
+    {
+      return fd_;
+    }
 
     void FD::reset()
     {
@@ -76,7 +80,7 @@ namespace ixxx {
       reset();
       return r;
     }
-    int FD::get()
+    int FD::get() const
     {
       return fd_;
     }
@@ -121,6 +125,10 @@ namespace ixxx {
       o.file_ = nullptr;
       return *this;
     }
+    File::operator FILE*() const
+    {
+      return file_;
+    }
 
     void File::reset()
     {
@@ -132,7 +140,7 @@ namespace ixxx {
       reset();
       return r;
     }
-    FILE *File::get()
+    FILE *File::get() const
     {
       return file_;
     }

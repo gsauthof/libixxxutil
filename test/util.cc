@@ -22,15 +22,15 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         {
           ixxx::util::File f(filename, "w");
           const char inp[] = "Hello World";
-          ixxx::ansi::fwrite(inp, 1, strlen(inp), f.get());
+          ixxx::ansi::fwrite(inp, 1, strlen(inp), f);
         }
         int t = -1;
         char out[12] = {0};
         {
-        ixxx::util::FD fd(filename, O_RDONLY);
-        t = fd.get();
-        BOOST_CHECK(fcntl(t, F_GETFD) != -1);
-        ixxx::posix::read(fd.get(), out, 11);
+          ixxx::util::FD fd(filename, O_RDONLY);
+          t = fd;
+          BOOST_CHECK(fcntl(t, F_GETFD) != -1);
+          ixxx::posix::read(fd, out, 11);
         }
         BOOST_CHECK(fcntl(t, F_GETFD) == -1);
         BOOST_CHECK_EQUAL(out, "Hello World");
