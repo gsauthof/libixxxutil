@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 2.8.8)
 project(ixxxutil CXX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
-add_subdirectory(libixxx)
 
 # guard from super-projects, i.e. when it is added as subdirectory
 IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
+
+  add_subdirectory(libixxx)
 
   # only for the unittests
   find_package(Boost 1.53
