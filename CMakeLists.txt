@@ -39,8 +39,16 @@ set(LIB_SRC ixxx/util.cc ixxx/util/boost.cc)
 add_library(ixxxutil SHARED
   ${LIB_SRC}
 )
+set_property(TARGET ixxxutil PROPERTY INCLUDE_DIRECTORIES
+  ${Boost_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/libixxx
+)
 add_library(ixxxutil_static STATIC
   ${LIB_SRC}
+)
+set_property(TARGET ixxxutil_static PROPERTY INCLUDE_DIRECTORIES
+  ${Boost_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/libixxx
 )
 # under windows shared/static libraries have the same extension ...
 if(${UNIX})
