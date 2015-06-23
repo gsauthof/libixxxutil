@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "util.hh"
 
 #include <ixxx/ixxx.h>
+#include <sys/mman.h>
 
 namespace ixxx {
 
@@ -80,9 +81,15 @@ namespace ixxx {
     FD::~FD()
     {
       try {
-        if (fd_ > -1)
-          ixxx::posix::close(fd_);
+        FD::close();
       } catch (...) {
+      }
+    }
+    void FD::close()
+    {
+      if (fd_ > -1) {
+        ixxx::posix::close(fd_);
+        fd_ = -1;
       }
     }
 
@@ -140,9 +147,15 @@ namespace ixxx {
     File::~File()
     {
       try {
-        if (file_)
-          fclose(file_);
+        File::close();
       } catch (...) {
+      }
+    }
+    void File::close()
+    {
+      if (file_) {
+        fclose(file_);
+        file_ = nullptr;
       }
     }
 
@@ -171,6 +184,157 @@ namespace ixxx {
     {
       return file_;
     }
+
+
+    Mapping::Mapping()
+    {
+    }
+    Mapping::Mapping(FD &fd, size_t length, int prot, int flags)
+      :
+        length_(length)
+    {
+      addr_ = ixxx::posix::mmap(nullptr, length_, prot, flags, fd, 0);
+    }
+    Mapping::Mapping(Mapping &&o)
+      :
+        addr_(o.addr_),
+        length_(o.length_)
+    {
+      o.addr_ = nullptr;
+      o.length_ = 0;
+    }
+    Mapping::~Mapping()
+    {
+      try {
+        unmap();
+      } catch (...) {
+      }
+    }
+    void Mapping::unmap()
+    {
+      if (addr_) {
+        ixxx::posix::munmap(addr_, length_);
+        addr_ = nullptr;
+      }
+    }
+    Mapping &Mapping::operator=(Mapping &&o)
+    {
+      addr_ = o.addr_;
+      o.addr_ = nullptr;
+      length_ = o.length_;
+      o.length_ = 0;
+      return *this;
+    }
+
+    const uint8_t *Mapping::begin() const
+    {
+      return static_cast<const uint8_t*>(addr_);
+    }
+    const uint8_t *Mapping::end() const
+    {
+      return static_cast<const uint8_t*>(addr_) + length_;
+    }
+    uint8_t *Mapping::begin()
+    {
+      return static_cast<uint8_t*>(addr_);
+    }
+    uint8_t *Mapping::end()
+    {
+      return static_cast<uint8_t*>(addr_) + length_;
+    }
+    const char *Mapping::s_begin() const
+    {
+      return static_cast<const char*>(addr_);
+    }
+    const char *Mapping::s_end() const
+    {
+      return static_cast<const char*>(addr_) + length_;
+    }
+    char *Mapping::s_begin()
+    {
+      return static_cast<char*>(addr_);
+    }
+    char *Mapping::s_end()
+    {
+      return static_cast<char*>(addr_) + length_;
+    }
+
+    Mapped_File::Mapped_File(const std::string &filename,
+        bool read,
+        bool write,
+        size_t size)
+    {
+      int prot = 0;
+      int flags = 0;
+      int open_flags = 0;
+
+      if (read) {
+        prot |= PROT_READ;
+        flags = MAP_PRIVATE;
+        open_flags = O_RDONLY;
+      }
+      if (write) {
+        prot |= PROT_WRITE;
+        flags = MAP_SHARED;
+        if (read) {
+          open_flags = O_CREAT | O_RDWR;
+        } else {
+          //open_flags = O_CREAT | O_WRONLY;
+          // required at least on Linux 4
+          open_flags = O_CREAT | O_RDWR;
+        }
+      }
+      mode_t mode = 0666;
+      fd_ = FD(filename, open_flags, mode);
+      if (write && size) {
+        ixxx::posix::ftruncate(fd_, size);
+      }
+      if (!size) {
+        struct stat s;
+        ixxx::posix::fstat(fd_, s);
+        size = s.st_size;
+      }
+      mapping_ = Mapping(fd_, size, prot, flags);
+    }
+    void Mapped_File::close()
+    {
+      mapping_.unmap();
+      fd_.close();
+    }
+    const uint8_t *Mapped_File::begin() const
+    {
+      return mapping_.begin();
+    }
+    const uint8_t *Mapped_File::end() const
+    {
+      return mapping_.end();
+    }
+    uint8_t *Mapped_File::begin()
+    {
+      return mapping_.begin();
+    }
+    uint8_t *Mapped_File::end()
+    {
+      return mapping_.end();
+    }
+    const char *Mapped_File::s_begin() const
+    {
+      return mapping_.s_begin();
+    }
+    const char *Mapped_File::s_end() const
+    {
+      return mapping_.s_end();
+    }
+    char *Mapped_File::s_begin()
+    {
+      return mapping_.s_begin();
+    }
+    char *Mapped_File::s_end()
+    {
+      return mapping_.s_end();
+    }
+
+
 
   }
 

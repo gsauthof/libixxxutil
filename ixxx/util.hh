@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <stdint.h>
 #include <string>
 
 namespace ixxx {
@@ -61,6 +62,9 @@ namespace ixxx {
         void reset();
         int release();
         int get() const;
+
+        // allow to throw
+        void close();
     };
 
     class File {
@@ -83,6 +87,63 @@ namespace ixxx {
         void reset();
         FILE *release();
         FILE *get() const;
+
+        // allow to throw
+        void close();
+    };
+
+    class Mapping {
+      private:
+        void *addr_ {nullptr};
+        size_t length_ {0u};
+      public:
+        Mapping();
+        Mapping(FD &fd, size_t length, int prot, int flags);
+        Mapping(Mapping &&);
+        Mapping(const Mapping &) = delete;
+        ~Mapping();
+
+        // allow to throw
+        void unmap();
+
+        const uint8_t *begin() const;
+        const uint8_t *end() const;
+        uint8_t *begin();
+        uint8_t *end();
+        const char *s_begin() const;
+        const char *s_end() const;
+        char *s_begin();
+        char *s_end();
+
+        Mapping &operator=(Mapping &&);
+        Mapping &operator=(const Mapping &) = delete;
+    };
+
+    class Mapped_File {
+      private:
+        FD fd_;
+        Mapping mapping_;
+      public:
+        Mapped_File(const std::string &filename,
+            bool read = true, bool write = false,
+            size_t size = 0u);
+        Mapped_File(const Mapped_File &) =delete;
+        //Mapped_File(Mapped_File &&);
+
+        // allow to throw
+        void close();
+
+        const uint8_t *begin() const;
+        const uint8_t *end() const;
+        uint8_t *begin();
+        uint8_t *end();
+        const char *s_begin() const;
+        const char *s_end() const;
+        char *s_begin();
+        char *s_end();
+
+        //Mapped_File &operator=(Mapped_File &&);
+        Mapped_File &operator=(const Mapped_File &) =delete;
     };
 
 
