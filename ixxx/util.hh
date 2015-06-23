@@ -133,6 +133,8 @@ namespace ixxx {
         // allow to throw
         void close();
 
+        FD fd();
+
         const uint8_t *begin() const;
         const uint8_t *end() const;
         uint8_t *begin();

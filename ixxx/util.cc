@@ -301,6 +301,11 @@ namespace ixxx {
       mapping_.unmap();
       fd_.close();
     }
+    FD Mapped_File::fd()
+    {
+      mapping_.unmap();
+      return std::move(fd_);
+    }
     const uint8_t *Mapped_File::begin() const
     {
       return mapping_.begin();
