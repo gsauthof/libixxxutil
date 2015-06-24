@@ -279,8 +279,10 @@ namespace ixxx {
         if (read) {
           open_flags = O_CREAT | O_RDWR;
         } else {
-          //open_flags = O_CREAT | O_WRONLY;
-          // required at least on Linux 4
+          // Even for just PROT_WRITE, POSIX requires that fd is
+          // opened with O_RDWR. This requirement is e.g. enforced
+          // by Linux.
+          // open_flags = O_CREAT | O_WRONLY;
           open_flags = O_CREAT | O_RDWR;
         }
       }
