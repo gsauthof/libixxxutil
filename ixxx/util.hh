@@ -144,6 +144,8 @@ namespace ixxx {
         char *s_begin();
         char *s_end();
 
+        size_t size() const;
+
         //Mapped_File &operator=(Mapped_File &&);
         Mapped_File &operator=(const Mapped_File &) =delete;
     };

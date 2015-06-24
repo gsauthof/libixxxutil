@@ -341,6 +341,10 @@ namespace ixxx {
       return mapping_.s_end();
     }
 
+    size_t Mapped_File::size() const
+    {
+      return end()-begin();
+    }
 
 
   }
