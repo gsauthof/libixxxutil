@@ -40,7 +40,20 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         boost::filesystem::remove_all(dirname);
       }
 
-    BOOST_AUTO_TEST_SUITE_END()
+      BOOST_AUTO_TEST_CASE(which_throw)
+      {
+        deque<string> path = { "/bin", "/usr/bin" };
+        BOOST_CHECK_THROW(
+            ixxx::util::which(path, "___does_no_exist___"), std::range_error);
+      }
+      BOOST_AUTO_TEST_CASE(which_basic)
+      {
+        deque<string> path = { "/bin", "/usr/bin" };
+        string r(ixxx::util::which(path, "sh"));
+        BOOST_CHECK(r == "/bin/sh" || r == "/usr/bin/sh");
+      }
+
+    BOOST_AUTO_TEST_SUITE_END() // misc
 
     BOOST_AUTO_TEST_SUITE(mapped_file_)
 
@@ -114,7 +127,8 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         boost::filesystem::remove_all(dirname);
       }
 
-    BOOST_AUTO_TEST_SUITE_END()
+
+    BOOST_AUTO_TEST_SUITE_END() // mapped_file_
 
   BOOST_AUTO_TEST_SUITE_END()
 

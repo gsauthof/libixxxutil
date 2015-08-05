@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <stdint.h>
 #include <string>
+#include <deque>
 
 namespace ixxx {
 
@@ -149,6 +150,9 @@ namespace ixxx {
         //Mapped_File &operator=(Mapped_File &&);
         Mapped_File &operator=(const Mapped_File &) =delete;
     };
+
+    std::string which(const std::deque<std::string> &path,
+        const std::string &filename);
 
 
   }

@@ -33,6 +33,9 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
     ${CMAKE_CURRENT_SOURCE_DIR}/libixxx
   )
 
+  # for executing it from a quickfix environment
+  add_custom_target(check COMMAND ut)
+
 endif()
 
 set(LIB_SRC ixxx/util.cc ixxx/util/boost.cc)

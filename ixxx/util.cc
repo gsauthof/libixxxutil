@@ -346,6 +346,24 @@ namespace ixxx {
       return end()-begin();
     }
 
+    std::string which(const std::deque<std::string> &path,
+        const std::string &filename)
+    {
+      for (auto &p : path) {
+        try {
+          std::string s(p);
+          s += '/';
+          s += filename;
+          struct stat buf {0};
+          ixxx::posix::stat(s, &buf);
+          return s;
+        } catch (const ixxx::errno_error &e) {
+          continue;
+        }
+      }
+      throw std::range_error("Not found in given path - file: " + filename);
+      return "";
+    }
 
   }
 
