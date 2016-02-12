@@ -3,6 +3,8 @@ Utility classes for scope based file management.
 Provided are classes to manage file descriptors, `FILE`
 pointers and memory mapped files (cf. [RAII][1]).
 
+[![Build Status](https://travis-ci.org/gsauthof/libixxxutil.svg?branch=master)](https://travis-ci.org/gsauthof/libixxxutil)
+
 ## Design
 
 - Conversion operators are provided to implicitly convert to
