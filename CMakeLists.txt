@@ -42,6 +42,7 @@ set(LIB_SRC ixxx/util.cc ixxx/util/boost.cc)
 add_library(ixxxutil SHARED
   ${LIB_SRC}
 )
+target_link_libraries(ixxxutil ixxx)
 set_property(TARGET ixxxutil PROPERTY INCLUDE_DIRECTORIES
   ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/libixxx
