@@ -48,10 +48,13 @@ namespace ixxx {
         FD(const char *filename, int flags, mode_t mode);
         FD(const std::string &filename, int flags);
         FD(const std::string &filename, int flags, mode_t mode);
+#if (defined(__APPLE__) && defined(__MACH__))
+#else
         FD(FD &dir_fd, const char *filename, int flags);
         FD(FD &dir_fd, const char *filename, int flags, mode_t mode);
         FD(FD &dir_fd, const std::string &filename, int flags);
         FD(FD &dir_fd, const std::string &filename, int flags, mode_t mode);
+#endif
         FD(const FD &) =delete;
         FD(FD &&o);
         ~FD();

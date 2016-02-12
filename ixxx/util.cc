@@ -57,6 +57,8 @@ namespace ixxx {
       : fd_(ixxx::posix::open(filename, flags, mode))
     {
     }
+#if (defined(__APPLE__) && defined(__MACH__))
+#else
     FD::FD(FD &dir_fd, const char *filename, int flags)
       : fd_(ixxx::posix::openat(dir_fd.get(), filename, flags))
     {
@@ -73,6 +75,7 @@ namespace ixxx {
       : fd_(ixxx::posix::openat(dir_fd.get(), filename, flags, mode))
     {
     }
+#endif
     FD::FD(FD &&o)
       : fd_(o.fd_)
     {
