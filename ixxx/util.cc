@@ -28,7 +28,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "util.hh"
 
 #include <ixxx/ixxx.h>
-#include <sys/mman.h>
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+  #include <windows.h>
+  // cf.
+  // mingw/include/io.h       _get_osfhandle()
+  // include/memoryapi.h      CreateFileMapping()
+  // include/errhandlingapi.h GetLastError()
+#else
+  #include <sys/mman.h>
+#endif
 
 namespace ixxx {
 
@@ -58,6 +66,7 @@ namespace ixxx {
     {
     }
 #if (defined(__APPLE__) && defined(__MACH__))
+#elif (defined(__MINGW32__) || defined(__MINGW64__))
 #else
     FD::FD(FD &dir_fd, const char *filename, int flags)
       : fd_(ixxx::posix::openat(dir_fd.get(), filename, flags))
@@ -196,7 +205,22 @@ namespace ixxx {
       :
         length_(length)
     {
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+      HANDLE h = reinterpret_cast<HANDLE>(_get_osfhandle(fd.get()));
+      if (h == INVALID_HANDLE_VALUE)
+        throw std::runtime_error("mapping failed: invalid handle");
+      HANDLE fm = CreateFileMapping(h, NULL,
+          prot ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
+      if (!fm)
+        throw std::runtime_error("Create mapping failed"); // GetLastError()
+      addr_ = MapViewOfFile(fm, prot ? FILE_MAP_WRITE : FILE_MAP_READ,
+          0, /*off*/ 0, length);
+      CloseHandle(fm);
+      if (!addr_)
+        throw std::runtime_error("Could not create view"); // GetLastError()
+#else
       addr_ = ixxx::posix::mmap(nullptr, length_, prot, flags, fd, 0);
+#endif
     }
     Mapping::Mapping(Mapping &&o)
       :
@@ -216,7 +240,13 @@ namespace ixxx {
     void Mapping::unmap()
     {
       if (addr_) {
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+        auto r = UnmapViewOfFile(addr_);
+        if (!r)
+          throw std::runtime_error("unmap failed"); // GetLastError() -> code
+#else
         ixxx::posix::munmap(addr_, length_);
+#endif
         addr_ = nullptr;
       }
     }
@@ -272,13 +302,20 @@ namespace ixxx {
       int open_flags = 0;
 
       if (read) {
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+#else
         prot |= PROT_READ;
         flags = MAP_PRIVATE;
+#endif
         open_flags = O_RDONLY;
       }
       if (write) {
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+        prot = 1;
+#else
         prot |= PROT_WRITE;
         flags = MAP_SHARED;
+#endif
         if (read) {
           open_flags = O_CREAT | O_RDWR;
         } else {
