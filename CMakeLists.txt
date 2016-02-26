@@ -39,11 +39,18 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
 
 endif()
 
+# XXX remove boost.cc from library
 set(LIB_SRC ixxx/util.cc ixxx/util/boost.cc)
 add_library(ixxxutil SHARED
   ${LIB_SRC}
 )
-target_link_libraries(ixxxutil ixxx)
+target_link_libraries(ixxxutil ixxx
+  # XXX remove, when boost.cc is removed from lib
+  ${Boost_SYSTEM_LIBRARY})
+# needed for mapped file size workaround in boost.cc
+if(WIN32)
+  target_link_libraries(ixxxutil ${Boost_FILESYSTEM_LIBRARY})
+endif()
 set_property(TARGET ixxxutil PROPERTY INCLUDE_DIRECTORIES
   ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/libixxx
