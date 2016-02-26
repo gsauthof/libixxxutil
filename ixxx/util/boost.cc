@@ -98,10 +98,10 @@ namespace ixxx {
       :
         file_(filename, boost::interprocess::read_write),
 #if (defined(__MINGW32__) || defined(__MINGW64__))
-        region_(file_, boost::interprocess::read_only,
+        region_(file_, boost::interprocess::read_write,
             0, boost::filesystem::file_size(filename))
 #else
-        region_(file_, boost::interprocess::read_only)
+        region_(file_, boost::interprocess::read_write)
 #endif
     {
     }
