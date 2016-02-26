@@ -22,6 +22,7 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
     test/main.cc
     test/boost.cc
     test/util.cc
+    test/helper.cc
   )
   target_link_libraries(ut
     ixxx_static

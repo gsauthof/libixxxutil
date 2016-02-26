@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost.hh"
 
 #include <utility>
+#include <boost/filesystem.hpp>
 
 namespace ixxx {
 
@@ -39,7 +40,15 @@ namespace ixxx {
     RO_Mapped_File::RO_Mapped_File(const char *filename)
       :
         file_(filename, boost::interprocess::read_only),
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+        // at least with mingw64 and under wine 1.9.3,
+        // the automatically determined size
+        // is rounded up to the next page ...
+        region_(file_, boost::interprocess::read_only,
+            0, boost::filesystem::file_size(filename))
+#else
         region_(file_, boost::interprocess::read_only)
+#endif
     {
     }
     RO_Mapped_File::RO_Mapped_File(const std::string &filename)
@@ -88,7 +97,12 @@ namespace ixxx {
     RW_Mapped_File::RW_Mapped_File(const char *filename)
       :
         file_(filename, boost::interprocess::read_write),
-        region_(file_, boost::interprocess::read_write)
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+        region_(file_, boost::interprocess::read_only,
+            0, boost::filesystem::file_size(filename))
+#else
+        region_(file_, boost::interprocess::read_only)
+#endif
     {
     }
     RW_Mapped_File::RW_Mapped_File(const std::string &filename)
