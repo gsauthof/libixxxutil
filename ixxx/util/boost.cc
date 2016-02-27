@@ -41,9 +41,13 @@ namespace ixxx {
       :
         file_(filename, boost::interprocess::read_only),
 #if (defined(__MINGW32__) || defined(__MINGW64__))
-        // at least with mingw64 and under wine 1.9.3,
-        // the automatically determined size
-        // is rounded up to the next page ...
+        // Wine 1.9.3 staging doesn't correctly implement the
+        // undocumented ntdll function that boost internally uses to
+        // determine the filesize:
+        // the automatically determined size is rounded up to the next page ...
+        // (Natively, it works as expected and as documented in Boost.)
+        // see also:
+        // https://bugs.winehq.org/show_bug.cgi?id=40225
         region_(file_, boost::interprocess::read_only,
             0, boost::filesystem::file_size(filename))
 #else
