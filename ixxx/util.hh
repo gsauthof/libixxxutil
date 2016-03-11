@@ -41,6 +41,7 @@ namespace ixxx {
     class FD {
       private:
         int fd_ {-1};
+        bool keep_open_ {false};
       public:
         FD();
         FD(int fd);
@@ -67,7 +68,9 @@ namespace ixxx {
         int release();
         int get() const;
 
-        // allow to throw
+        void set_keep_open(bool b);
+
+        // throws
         void close();
     };
 
