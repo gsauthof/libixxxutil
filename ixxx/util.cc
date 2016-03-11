@@ -86,12 +86,16 @@ namespace ixxx {
     }
 #endif
     FD::FD(FD &&o)
-      : fd_(o.fd_)
+      :
+        fd_(o.fd_),
+        keep_open_(o.keep_open_)
     {
       o.fd_ = -1;
     }
     FD::~FD()
     {
+      if (keep_open_)
+        return;
       try {
         FD::close();
       } catch (...) {
@@ -108,6 +112,7 @@ namespace ixxx {
     FD &FD::operator=(FD &&o)
     {
       fd_ = o.fd_;
+      keep_open_ = o.keep_open_;
       o.fd_ = -1;
       return *this;
     }
@@ -129,6 +134,11 @@ namespace ixxx {
     int FD::get() const
     {
       return fd_;
+    }
+
+    void FD::set_keep_open(bool b)
+    {
+      keep_open_ = b;
     }
 
 
