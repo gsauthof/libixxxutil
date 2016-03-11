@@ -48,6 +48,37 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         boost::filesystem::remove_all(dirname);
       }
 
+      BOOST_AUTO_TEST_CASE(no_auto_close)
+      {
+        char dir_template[1024] = "ixxxutil_XXXXXX";
+        string dirname(portable_mkdtemp(dir_template));
+        string filename(dirname + "/foo");
+        {
+          ixxx::util::File f(filename, "w");
+          const char inp[] = "Hello World";
+          ixxx::ansi::fwrite(inp, 1, strlen(inp), f);
+        }
+        int t = -1;
+        char out[12] = {0};
+        {
+          auto x = ixxx::posix::open(filename, O_RDONLY);
+          ixxx::util::FD fd(x);
+          fd.set_keep_open(true);
+          t = fd;
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+          (void)t;
+#else
+          BOOST_CHECK(fcntl(t, F_GETFD) != -1);
+#endif
+          ixxx::posix::read(fd, out, 11);
+        }
+#if !(defined(__MINGW32__) || defined(__MINGW64__))
+        BOOST_CHECK(fcntl(t, F_GETFD) != -1);
+#endif
+        BOOST_CHECK_EQUAL(out, "Hello World");
+        boost::filesystem::remove_all(dirname);
+      }
+
       BOOST_AUTO_TEST_CASE(which_throw)
       {
         deque<string> path = { "/bin", "/usr/bin" };
