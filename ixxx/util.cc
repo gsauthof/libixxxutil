@@ -45,8 +45,8 @@ namespace ixxx {
     FD::FD()
     {
     }
-    FD::FD(int fd)
-      : fd_(fd)
+    FD::FD(int fd, bool keep_open)
+      : fd_(fd), keep_open_(keep_open)
     {
     }
     FD::FD(const char *filename, int flags)
