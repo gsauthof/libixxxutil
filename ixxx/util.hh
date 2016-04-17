@@ -44,7 +44,7 @@ namespace ixxx {
         bool keep_open_ {false};
       public:
         FD();
-        FD(int fd);
+        FD(int fd, bool keep_open = false);
         FD(const char *filename, int flags);
         FD(const char *filename, int flags, mode_t mode);
         FD(const std::string &filename, int flags);
