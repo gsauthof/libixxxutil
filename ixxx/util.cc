@@ -85,6 +85,9 @@ namespace ixxx {
     {
     }
 #endif
+
+    // XXX destruct i.e. 'close' before move ...
+    // also for move-assigment and other classes ...
     FD::FD(FD &&o)
       :
         fd_(o.fd_),
@@ -111,6 +114,7 @@ namespace ixxx {
 
     FD &FD::operator=(FD &&o)
     {
+      FD::close();
       fd_ = o.fd_;
       keep_open_ = o.keep_open_;
       o.fd_ = -1;
@@ -183,6 +187,7 @@ namespace ixxx {
 
     File &File::operator=(File &&o)
     {
+      File::close();
       file_ = o.file_;
       o.file_ = nullptr;
       return *this;
@@ -262,6 +267,7 @@ namespace ixxx {
     }
     Mapping &Mapping::operator=(Mapping &&o)
     {
+      unmap();
       addr_ = o.addr_;
       o.addr_ = nullptr;
       length_ = o.length_;

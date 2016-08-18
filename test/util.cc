@@ -79,6 +79,40 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         boost::filesystem::remove_all(dirname);
       }
 
+#if !(defined(__MINGW32__) || defined(__MINGW64__))
+      BOOST_AUTO_TEST_CASE(close_because_of_move)
+      {
+        char dir_template[1024] = "ixxxutil_XXXXXX";
+        string dirname(portable_mkdtemp(dir_template));
+        ixxx::util::FD f(dirname + "/foo", O_CREAT | O_WRONLY, 0666);
+        int fd = f.get();
+        BOOST_CHECK(fcntl(fd, F_GETFD) != -1);
+        ixxx::util::FD g(dirname + "/bar", O_CREAT | O_WRONLY, 0666);
+        int gd = g.get();
+        BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
+        f = std::move(g);
+        BOOST_CHECK(fcntl(fd, F_GETFD) == -1);
+        BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
+        BOOST_CHECK_EQUAL(g.get(), -1);
+      }
+
+      BOOST_AUTO_TEST_CASE(close_because_of_move_file)
+      {
+        char dir_template[1024] = "ixxxutil_XXXXXX";
+        string dirname(portable_mkdtemp(dir_template));
+        ixxx::util::File f(dirname + "/foo", "w");
+        int fd = ixxx::posix::fileno(f.get());
+        BOOST_CHECK(fcntl(fd, F_GETFD) != -1);
+        ixxx::util::File g(dirname + "/bar", "w");
+        int gd = ixxx::posix::fileno(g.get());
+        BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
+        f = std::move(g);
+        BOOST_CHECK(fcntl(fd, F_GETFD) == -1);
+        BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
+        BOOST_CHECK(g.get() == nullptr);
+      }
+#endif
+
       BOOST_AUTO_TEST_CASE(which_throw)
       {
         deque<string> path = { "/bin", "/usr/bin" };
