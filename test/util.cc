@@ -194,11 +194,11 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         string dirname(portable_mkdtemp(dir_template));
         string filename(dirname + "/foo");
         {
-          BOOST_CHECKPOINT("Read/Write mapping of: " << filename);
+          BOOST_TEST_CHECKPOINT("Read/Write mapping of: " << filename);
           const char hw[] = "Hello World";
           ixxx::util::Mapped_File f(filename, true, true, sizeof(hw)-1);
           memcpy(f.begin(), hw, sizeof(hw)-1);
-          BOOST_CHECKPOINT("Read directly after creation of: " << filename);
+          BOOST_TEST_CHECKPOINT("Read directly after creation of: " << filename);
           string out(f.s_begin(), f.s_end());
           BOOST_CHECK_EQUAL(out, "Hello World");
         }
