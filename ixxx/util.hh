@@ -160,6 +160,11 @@ namespace ixxx {
     std::string which(const std::deque<std::string> &path,
         const std::string &filename);
 
+    size_t write_retry(int fd, const void *buf, size_t n);
+    size_t write_all(int fd, const void *buf, size_t n);
+
+    size_t read_retry(int fd, void *buf, size_t n);
+    size_t read_all(int fd, void *buf, size_t n);
 
   }
 

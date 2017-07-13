@@ -421,6 +421,62 @@ namespace ixxx {
       return "";
     }
 
+    size_t write_retry(int fd, const void *buf, size_t n)
+    {
+      for (;;) {
+        try {
+          ssize_t r = ixxx::posix::write(fd, buf, n);
+          return r;
+        } catch (const ixxx::errno_error &e) {
+          if (e.code() == EINTR)
+            continue;
+          throw;
+        }
+        break;
+      }
+      return 0; // never reached
+    }
+    size_t write_all(int fd, const void *buf, size_t n)
+    {
+      size_t m = n;
+      size_t off = 0;
+      while (m) {
+        size_t r = write_retry(fd, static_cast<const char*>(buf)+off, m);
+        off += r;
+        m   -= r;
+      }
+      return off;
+    }
+
+    size_t read_retry(int fd, void *buf, size_t n)
+    {
+      for (;;) {
+        try {
+          ssize_t r = ixxx::posix::read(fd, buf, n);
+          return r;
+        } catch (const ixxx::errno_error &e) {
+          if (e.code() == EINTR)
+            continue;
+          throw;
+        }
+        break;
+      }
+      return 0; // never reached
+    }
+    size_t read_all(int fd, void *buf, size_t n)
+    {
+      size_t m = n;
+      size_t off = 0;
+      while (m) {
+        size_t r = read_retry(fd, static_cast<char*>(buf)+off, m);
+        off += r;
+        if (!r)
+          return off;
+        m   -= r;
+      }
+      return off;
+    }
+
   }
 
 }
