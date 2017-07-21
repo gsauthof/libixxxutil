@@ -38,6 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #include <sys/mman.h>
 #endif
 
+#include <stdlib.h>
+
 namespace ixxx {
 
   namespace util {
@@ -400,6 +402,12 @@ namespace ixxx {
     size_t Mapped_File::size() const
     {
       return end()-begin();
+    }
+
+    const char *getenv(const char *name, const char *dflt)
+    {
+      const char *r = ::getenv(name);
+      return r ? r : dflt;
     }
 
     std::string which(const std::deque<std::string> &path,

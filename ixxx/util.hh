@@ -157,6 +157,8 @@ namespace ixxx {
         Mapped_File &operator=(const Mapped_File &) =delete;
     };
 
+    const char *getenv(const char *name, const char *dflt);
+
     std::string which(const std::deque<std::string> &path,
         const std::string &filename);
 
