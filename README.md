@@ -48,6 +48,7 @@ Compare two files via memory mappings:
 
 ## Compile
 
+    $ git submodule update --init
     $ mkdir build
     $ cd build
     $ cmake ..
