@@ -404,6 +404,84 @@ namespace ixxx {
       return end()-begin();
     }
 
+    Directory::Directory() =default;
+    Directory::Directory(const char *name)
+      :
+        dir_(ixxx::posix::opendir(name))
+    {
+    }
+    Directory::Directory(const std::string &name)
+      :
+        dir_(ixxx::posix::opendir(name))
+    {
+    }
+    Directory::~Directory()
+    {
+      if (dir_) // destructor must not throw ...
+        ::closedir(dir_);
+    }
+    Directory::Directory(Directory &&o)
+      : dir_(o.dir_)
+    {
+      o.dir_ = nullptr;
+    }
+    Directory &Directory::operator=(Directory &&o)
+    {
+      close();
+      dir_ = o.dir_;
+      o.dir_ = nullptr;
+      return *this;
+    }
+    const struct dirent *Directory::read()
+    {
+      entry_ = ixxx::posix::readdir(dir_);
+      return entry_;
+    }
+    const struct dirent &Directory::entry() const
+    {
+      return *entry_;
+    }
+    void Directory::close()
+    {
+      if (dir_)
+        ixxx::posix::closedir(dir_);
+    }
+
+    Directory_Iterator::Directory_Iterator() =default;
+    Directory_Iterator::Directory_Iterator(const char *name)
+      :
+        d_(std::make_shared<Directory>(name))
+    {
+      ++(*this);
+    }
+    Directory_Iterator::Directory_Iterator(const std::string &name)
+      :
+        d_(std::make_shared<Directory>(name))
+    {
+      ++(*this);
+    }
+    bool Directory_Iterator::operator==(const Directory_Iterator &o) const
+    {
+      return d_.get() == o.d_.get();
+    }
+    bool Directory_Iterator::operator!=(const Directory_Iterator &o) const
+    {
+      return !(*this == o);
+    }
+    Directory_Iterator &Directory_Iterator::operator++()
+    {
+      auto r = d_->read();
+      if (!r) {
+        std::shared_ptr<Directory> t;
+        d_.swap(t);
+      }
+      return *this;
+    }
+    const struct dirent &Directory_Iterator::operator*() const
+    {
+      return d_->entry();
+    }
+
     const char *getenv(const char *name, const char *dflt)
     {
       const char *r = ::getenv(name);

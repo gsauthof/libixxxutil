@@ -30,9 +30,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <dirent.h>
 #include <stdint.h>
 #include <string>
 #include <deque>
+#include <memory>
+#include <iterator>
 
 namespace ixxx {
 
@@ -156,6 +159,56 @@ namespace ixxx {
         //Mapped_File &operator=(Mapped_File &&);
         Mapped_File &operator=(const Mapped_File &) =delete;
     };
+
+    class Directory {
+      public:
+        Directory();
+        Directory(const char *name);
+        Directory(const std::string &name);
+        ~Directory();
+        Directory(const Directory &) =delete;
+        Directory &operator=(const Directory &) =delete;
+        Directory(Directory &&);
+        Directory &operator=(Directory &&);
+        const struct dirent *read();
+        const struct dirent &entry() const;
+        void close();
+      private:
+        DIR *dir_ {nullptr};
+        struct dirent *entry_ {nullptr};
+    };
+
+    // See also boost::filesystem::directory_iterator (bdi) for a boost
+    // implementation: http://www.boost.org/doc/libs/1_64_0/libs/filesystem/doc/reference.html#Class-directory_iterator
+    // bdi also is a single-pass iterator and also uses a shared-pointer
+    // in addition, it uses boost iterator facade
+    // cf. http://www.boost.org/doc/libs/1_64_0/libs/iterator/doc/iterator_facade.html
+    class Directory_Iterator {
+      public:
+        // boost category: single-pass iterator
+        using iterator_category = std::input_iterator_tag;
+        using difference_type   = ssize_t;
+        using value_type        = struct dirent;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+        Directory_Iterator();
+        Directory_Iterator(const char *name);
+        Directory_Iterator(const std::string &name);
+        bool                operator==(const Directory_Iterator &o) const;
+        bool                operator!=(const Directory_Iterator &o) const;
+        Directory_Iterator &operator++();
+        const struct dirent &operator*() const;
+      private:
+        std::shared_ptr<Directory> d_;
+    };
+
+    // a pair of iterators for e.g. a range-loop can be obtained like this:
+    //
+    // #include <boost/range/iterator_range_core.hpp>
+    //
+    // boost::iterator_range<ixxx::util::Directory_Iterator>(
+    //     ixxx::util::Directory_Iterator(name),
+    //     ixxx::util::Directory_Iterator())
 
     const char *getenv(const char *name, const char *dflt);
 
