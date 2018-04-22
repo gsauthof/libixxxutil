@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         { // make sure that the file is closed/unmapped
           // before the remove - otherwise we get a sharing
           // violation on Windows ...
-        ixxx::util::Mapped_File f(filename);
+        auto f = ixxx::util::mmap_file(filename);
         string out(f.s_begin(), f.s_end());
         BOOST_CHECK_EQUAL(out, "Hello World");
         }
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
           ixxx::ansi::fwrite(inp, 1, strlen(inp), f.get());
         }
         {
-        ixxx::util::Mapped_File f(filename);
+        auto f = ixxx::util::mmap_file(filename);
         const uint8_t *begin = f.begin();
         const uint8_t *end = f.end();
         string out(reinterpret_cast<const char *>(begin), reinterpret_cast<const char*>(end));
@@ -181,11 +181,11 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         string filename(dirname + "/foo");
         {
           const char hw[] = "Hello World";
-          ixxx::util::Mapped_File f(filename, false, true, sizeof(hw)-1);
+          auto f = ixxx::util::mmap_file(filename, false, true, sizeof(hw)-1);
           memcpy(f.begin(), hw, sizeof(hw)-1);
         }
         {
-        ixxx::util::Mapped_File f(filename);
+        auto f = ixxx::util::mmap_file(filename);
         string out(f.s_begin(), f.s_end());
         BOOST_CHECK_EQUAL(out, "Hello World");
         }
@@ -200,14 +200,14 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         {
           BOOST_TEST_CHECKPOINT("Read/Write mapping of: " << filename);
           const char hw[] = "Hello World";
-          ixxx::util::Mapped_File f(filename, true, true, sizeof(hw)-1);
+          auto f = ixxx::util::mmap_file(filename, true, true, sizeof(hw)-1);
           memcpy(f.begin(), hw, sizeof(hw)-1);
           BOOST_TEST_CHECKPOINT("Read directly after creation of: " << filename);
           string out(f.s_begin(), f.s_end());
           BOOST_CHECK_EQUAL(out, "Hello World");
         }
         {
-        ixxx::util::Mapped_File f(filename);
+        auto f = ixxx::util::mmap_file(filename);
         string out(f.s_begin(), f.s_end());
         BOOST_CHECK_EQUAL(out, "Hello World");
         }

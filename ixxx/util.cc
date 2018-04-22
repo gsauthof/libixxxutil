@@ -215,31 +215,34 @@ namespace ixxx {
     }
 
 
-    Mapping::Mapping()
-    {
-    }
-    Mapping::Mapping(FD &fd, size_t length, int prot, int flags)
+    MMap::MMap() =default;
+    MMap::MMap(void *addr, size_t length, int prot, int flags,
+        int fd, off_t offset)
       :
         length_(length)
     {
+      if (length_) {
 #if (defined(__MINGW32__) || defined(__MINGW64__))
-      HANDLE h = reinterpret_cast<HANDLE>(_get_osfhandle(fd.get()));
-      if (h == INVALID_HANDLE_VALUE)
-        throw std::runtime_error("mapping failed: invalid handle");
-      HANDLE fm = CreateFileMapping(h, NULL,
-          prot ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
-      if (!fm)
-        throw std::runtime_error("Create mapping failed"); // GetLastError()
-      addr_ = MapViewOfFile(fm, prot ? FILE_MAP_WRITE : FILE_MAP_READ,
-          0, /*off*/ 0, length);
-      CloseHandle(fm);
-      if (!addr_)
-        throw std::runtime_error("Could not create view"); // GetLastError()
+        HANDLE h = reinterpret_cast<HANDLE>(_get_osfhandle(fd.get()));
+        if (h == INVALID_HANDLE_VALUE)
+          throw std::runtime_error("mapping failed: invalid handle");
+        HANDLE fm = CreateFileMapping(h, NULL,
+            prot ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
+        if (!fm)
+          throw std::runtime_error("Create mapping failed"); // GetLastError()
+        addr_ = MapViewOfFile(fm, prot ? FILE_MAP_WRITE : FILE_MAP_READ,
+            0, /*off*/ 0, length);
+        CloseHandle(fm);
+        if (!addr_)
+          throw std::runtime_error("Could not create view"); // GetLastError()
 #else
-      addr_ = ixxx::posix::mmap(nullptr, length_, prot, flags, fd, 0);
+        addr_ = ixxx::posix::mmap(addr, length_, prot, flags, fd, offset);
 #endif
+      } else {
+        addr_ = empty_;
+      }
     }
-    Mapping::Mapping(Mapping &&o)
+    MMap::MMap(MMap &&o)
       :
         addr_(o.addr_),
         length_(o.length_)
@@ -247,16 +250,17 @@ namespace ixxx {
       o.addr_ = nullptr;
       o.length_ = 0;
     }
-    Mapping::~Mapping()
+    MMap &MMap::operator=(MMap &&o)
     {
-      try {
-        unmap();
-      } catch (...) {
-      }
+      addr_ = o.addr_;
+      length_ = o.length_;
+      o.addr_ = nullptr;
+      o.length_ = 0;
+      return *this;
     }
-    void Mapping::unmap()
+    void MMap::unmap()
     {
-      if (addr_) {
+      if (addr_ && length_) {
 #if (defined(__MINGW32__) || defined(__MINGW64__))
         auto r = UnmapViewOfFile(addr_);
         if (!r)
@@ -265,144 +269,95 @@ namespace ixxx {
         ixxx::posix::munmap(addr_, length_);
 #endif
         addr_ = nullptr;
+        length_ = 0;
       }
     }
-    Mapping &Mapping::operator=(Mapping &&o)
+    MMap::~MMap()
     {
-      unmap();
-      addr_ = o.addr_;
-      o.addr_ = nullptr;
-      length_ = o.length_;
-      o.length_ = 0;
-      return *this;
+      try {
+        unmap();
+      } catch (...) {
+      }
     }
-
-    const uint8_t *Mapping::begin() const
+    const unsigned char *MMap::begin() const
     {
-      return static_cast<const uint8_t*>(addr_);
+      return static_cast<const unsigned char*>(addr_);
     }
-    const uint8_t *Mapping::end() const
+    const unsigned char *MMap::end() const
     {
-      return static_cast<const uint8_t*>(addr_) + length_;
+      return static_cast<const unsigned char*>(addr_) + length_;
     }
-    uint8_t *Mapping::begin()
+    unsigned char *MMap::begin()
     {
-      return static_cast<uint8_t*>(addr_);
+      return static_cast<unsigned char *>(addr_);
     }
-    uint8_t *Mapping::end()
+    unsigned char *MMap::end()
     {
-      return static_cast<uint8_t*>(addr_) + length_;
+      return static_cast<unsigned char*>(addr_) + length_;
     }
-    const char *Mapping::s_begin() const
+    const char *MMap::s_begin() const
     {
       return static_cast<const char*>(addr_);
     }
-    const char *Mapping::s_end() const
+    const char *MMap::s_end() const
     {
       return static_cast<const char*>(addr_) + length_;
     }
-    char *Mapping::s_begin()
+    char *MMap::s_begin()
     {
       return static_cast<char*>(addr_);
     }
-    char *Mapping::s_end()
+    char *MMap::s_end()
     {
       return static_cast<char*>(addr_) + length_;
     }
-
-    Mapped_File::Mapped_File(const std::string &filename,
-        bool read,
-        bool write,
-        size_t size)
+    size_t MMap::size() const
     {
-      int prot = 0;
-      int flags = 0;
-      int open_flags = 0;
+      return length_;
+    }
 
-      if (read) {
+    MMap mmap_file(FD &fd, bool read, bool write,
+        size_t length, size_t off)
+    {
 #if (defined(__MINGW32__) || defined(__MINGW64__))
-#else
-        prot |= PROT_READ;
-        flags = MAP_PRIVATE;
-#endif
-        open_flags = O_RDONLY;
-      }
-      if (write) {
-#if (defined(__MINGW32__) || defined(__MINGW64__))
+      int flags = 0;
+      int prot = 0;
+      if (write)
         prot = 1;
 #else
+      // for PROT_READ only mapping we can also use MAP_PRIVATE
+      // but it shouldn't make a difference
+      int flags = MAP_SHARED;
+      int prot = 0;
+      if (read)
+        prot |= PROT_READ;
+      if (write)
         prot |= PROT_WRITE;
-        flags = MAP_SHARED;
 #endif
-        if (read) {
-          open_flags = O_CREAT | O_RDWR;
-        } else {
-          // Even for just PROT_WRITE, POSIX requires that fd is
-          // opened with O_RDWR. This requirement is e.g. enforced
-          // by Linux.
-          // open_flags = O_CREAT | O_WRONLY;
-          open_flags = O_CREAT | O_RDWR;
-        }
-      }
-      mode_t mode = 0666;
-      fd_ = FD(filename, open_flags, mode);
-      if (write && size) {
-        ixxx::posix::ftruncate(fd_, size);
-      }
-      if (!size) {
+      return MMap(nullptr, length, prot, flags, fd, off);
+    }
+    MMap mmap_file(const std::string &filename, bool read, bool write,
+        size_t length, size_t off)
+    {
+      MMap m;
+      mode_t mode = write ? 0666 : 0444;
+      // Even for just PROT_WRITE, POSIX requires that fd is
+      // opened with O_RDWR. This requirement is e.g. enforced
+      // by Linux.
+      int open_flags = write ? O_CREAT | O_RDWR : O_RDONLY;
+      FD fd(filename, open_flags, mode);
+      if (write && !off && length)
+        ixxx::posix::ftruncate(fd, length);
+      if (!off && !length) {
         struct stat s;
-        ixxx::posix::fstat(fd_, s);
-        size = s.st_size;
+        ixxx::posix::fstat(fd, s);
+        length = s.st_size;
       }
-      mapping_ = Mapping(fd_, size, prot, flags);
-    }
-    void Mapped_File::close()
-    {
-      mapping_.unmap();
-      fd_.close();
-    }
-    FD Mapped_File::fd()
-    {
-      mapping_.unmap();
-      return std::move(fd_);
-    }
-    const uint8_t *Mapped_File::begin() const
-    {
-      return mapping_.begin();
-    }
-    const uint8_t *Mapped_File::end() const
-    {
-      return mapping_.end();
-    }
-    uint8_t *Mapped_File::begin()
-    {
-      return mapping_.begin();
-    }
-    uint8_t *Mapped_File::end()
-    {
-      return mapping_.end();
-    }
-    const char *Mapped_File::s_begin() const
-    {
-      return mapping_.s_begin();
-    }
-    const char *Mapped_File::s_end() const
-    {
-      return mapping_.s_end();
-    }
-    char *Mapped_File::s_begin()
-    {
-      return mapping_.s_begin();
-    }
-    char *Mapped_File::s_end()
-    {
-      return mapping_.s_end();
+      m = mmap_file(fd, read, write, length, off);
+      fd.close();
+      return m;
     }
 
-    size_t Mapped_File::size() const
-    {
-      return end()-begin();
-    }
 
     Directory::Directory() =default;
     Directory::Directory(const char *name)

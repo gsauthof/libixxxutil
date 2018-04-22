@@ -102,63 +102,37 @@ namespace ixxx {
         void close();
     };
 
-    class Mapping {
+    class MMap {
+      public:
+        MMap();
+        MMap(void *addr, size_t length, int prot, int flags,
+            int fd, off_t offset);
+        MMap(MMap &&);
+        MMap(const MMap &) =delete;
+        MMap &operator=(MMap &&);
+        MMap &operator=(const MMap &) = delete;
+
+        void unmap(); // allows to throw
+        ~MMap();
+        const unsigned char *begin() const;
+        const unsigned char *end() const;
+        unsigned char *begin();
+        unsigned char *end();
+        const char *s_begin() const;
+        const char *s_end() const;
+        char *s_begin();
+        char *s_end();
+        size_t size() const;
       private:
         void *addr_ {nullptr};
-        size_t length_ {0u};
-      public:
-        Mapping();
-        Mapping(FD &fd, size_t length, int prot, int flags);
-        Mapping(Mapping &&);
-        Mapping(const Mapping &) = delete;
-        ~Mapping();
-
-        // allow to throw
-        void unmap();
-
-        const uint8_t *begin() const;
-        const uint8_t *end() const;
-        uint8_t *begin();
-        uint8_t *end();
-        const char *s_begin() const;
-        const char *s_end() const;
-        char *s_begin();
-        char *s_end();
-
-        Mapping &operator=(Mapping &&);
-        Mapping &operator=(const Mapping &) = delete;
+        size_t length_ {0};
+        unsigned char empty_[0];
     };
-
-    class Mapped_File {
-      private:
-        FD fd_;
-        Mapping mapping_;
-      public:
-        Mapped_File(const std::string &filename,
-            bool read = true, bool write = false,
-            size_t size = 0u);
-        Mapped_File(const Mapped_File &) =delete;
-        //Mapped_File(Mapped_File &&);
-
-        // allow to throw
-        void close();
-
-        FD fd();
-
-        const uint8_t *begin() const;
-        const uint8_t *end() const;
-        uint8_t *begin();
-        uint8_t *end();
-        const char *s_begin() const;
-        const char *s_end() const;
-        char *s_begin();
-        char *s_end();
-
-        size_t size() const;
-
-        //Mapped_File &operator=(Mapped_File &&);
-        Mapped_File &operator=(const Mapped_File &) =delete;
-    };
+    MMap mmap_file(FD &fd, bool read = true, bool write = false,
+        size_t length = 0, size_t off = 0);
+    MMap mmap_file(const std::string &filename,
+        bool read = true, bool write = false,
+        size_t length = 0, size_t off = 0);
 
     class Directory {
       public:
