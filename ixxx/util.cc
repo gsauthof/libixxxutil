@@ -426,10 +426,8 @@ namespace ixxx {
     Directory_Iterator &Directory_Iterator::operator++()
     {
       auto r = d_->read();
-      if (!r) {
-        std::shared_ptr<Directory> t;
-        d_.swap(t);
-      }
+      if (!r)
+        d_.reset();
       return *this;
     }
     const struct dirent &Directory_Iterator::operator*() const
