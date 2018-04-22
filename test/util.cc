@@ -274,22 +274,16 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         for (auto fn : fns)
           ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY);
         vector<string> v;
-        auto gns = { "12342", "xyz"};
-        struct Cmp {
-            bool operator()(const char *a, const dirent &b) const {
-              return strcmp(a, b.d_name) < 0;
-            }
-            bool operator()(const dirent &a, const char *b) const {
-              return strcmp(a.d_name, b) < 0;
-            }
-        };
-        std::set_intersection(gns.begin(), gns.end(),
+        std::for_each(
             ixxx::util::Directory_Iterator(dname),
-            ixxx::util::Directory_Iterator(), std::back_inserter(v), Cmp());
-        BOOST_REQUIRE_EQUAL(v.size(), 2);
+            ixxx::util::Directory_Iterator(),
+            [&v](const struct dirent &d){ v.push_back(d.d_name); });
+        BOOST_REQUIRE_EQUAL(v.size(), 5);
         sort(v.begin(), v.end());
-        BOOST_CHECK_EQUAL(v[0], *gns.begin());
-        BOOST_CHECK_EQUAL(v[1], *(gns.begin()+1));
+        BOOST_CHECK_EQUAL(v[0], ".");
+        BOOST_CHECK_EQUAL(v[1], "..");
+        BOOST_CHECK_EQUAL(v[2], *(fns.begin()+0));
+        BOOST_CHECK_EQUAL(v[3], *(fns.begin()+1));
         for (auto fn : fns)
           ixxx::posix::unlink(dname+string("/")+fn);
         ixxx::posix::rmdir(dname);
