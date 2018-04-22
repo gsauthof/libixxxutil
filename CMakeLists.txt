@@ -17,10 +17,8 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
     REQUIRED)
 
   add_executable(ut
-    ixxx/util/boost.cc
     ixxx/util.cc
     test/main.cc
-    test/boost.cc
     test/util.cc
     test/helper.cc
   )
@@ -39,27 +37,20 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
 
 endif()
 
-# XXX remove boost.cc from library
-set(LIB_SRC ixxx/util.cc ixxx/util/boost.cc)
+set(LIB_SRC ixxx/util.cc)
 add_library(ixxxutil SHARED
   ${LIB_SRC}
 )
-target_link_libraries(ixxxutil ixxx
-  # XXX remove, when boost.cc is removed from lib
-  ${Boost_SYSTEM_LIBRARY})
-# needed for mapped file size workaround in boost.cc
-if(WIN32)
-  target_link_libraries(ixxxutil ${Boost_FILESYSTEM_LIBRARY})
-endif()
+target_link_libraries(ixxxutil
+    ixxx
+)
 set_property(TARGET ixxxutil PROPERTY INCLUDE_DIRECTORIES
-  ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/libixxx
 )
 add_library(ixxxutil_static STATIC
   ${LIB_SRC}
 )
 set_property(TARGET ixxxutil_static PROPERTY INCLUDE_DIRECTORIES
-  ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/libixxx
 )
 # under windows shared/static libraries have the same extension ...
