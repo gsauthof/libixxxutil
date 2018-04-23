@@ -25,25 +25,22 @@ Write to a file descriptor:
 
     void Foo::dump()
     {
-      util::FD fd(filename, O_CREAT | O_WRONLY, 0777);
-      posix::write(fd, array.data(), array.size());
+      util::FD fd(filename, O_CREAT | O_WRONLY | O_TRUNC, 0777);
+      posix::write(fd, array_.data(), array_.size());
       // ...
     }
 
 Compare two files via memory mappings:
 
     #include <algorithm>
+    #include <ixxx/util.hh>
 
-    // ...
-
-    void Bar::compare()
+    bool files_equal(const std::string &name_a, const std::string name_b)
     {
-      util::Mapped_File a(filename_a);
-      util::Mapped_File b(filename_b);
+      auto a = ixxx::util::mmap_file(name_a);
+      auto b = ixxx::util::mmap_file(name_b);
       bool are_equal = std::equal(a.begin(), a.end(), b.begin(), b.end());
-      if (!are_equal) {
-        // report differences ...
-      }
+      return are_equal;
     }
 
 ## Compile
