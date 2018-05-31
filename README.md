@@ -5,6 +5,8 @@ pointers and memory mapped files (cf. [RAII][1]).
 
 [![Build Status](https://travis-ci.org/gsauthof/libixxxutil.svg?branch=master)](https://travis-ci.org/gsauthof/libixxxutil)
 
+2015-2018, Georg Sauthoff <mail@gms.tf>, BSD-2-Clause
+
 ## Design
 
 - Conversion operators are provided to implicitly convert to
