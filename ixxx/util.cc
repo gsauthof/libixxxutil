@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 #include "util.hh"
 
-#include <ixxx/ixxx.h>
+#include <ixxx/ixxx.hh>
 #if (defined(__MINGW32__) || defined(__MINGW64__))
   #include <windows.h>
   // cf.
@@ -452,7 +452,7 @@ namespace ixxx {
           struct stat buf {0};
           ixxx::posix::stat(s, &buf);
           return s;
-        } catch (const ixxx::errno_error &e) {
+        } catch (const ixxx::sys_error &e) {
           continue;
         }
       }
@@ -466,7 +466,7 @@ namespace ixxx {
         try {
           ssize_t r = ixxx::posix::write(fd, buf, n);
           return r;
-        } catch (const ixxx::errno_error &e) {
+        } catch (const ixxx::sys_error &e) {
           if (e.code() == EINTR)
             continue;
           throw;
@@ -493,7 +493,7 @@ namespace ixxx {
         try {
           ssize_t r = ixxx::posix::read(fd, buf, n);
           return r;
-        } catch (const ixxx::errno_error &e) {
+        } catch (const ixxx::sys_error &e) {
           if (e.code() == EINTR)
             continue;
           throw;

@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include <ixxx/util.hh>
-#include <ixxx/ixxx.h>
+#include <ixxx/ixxx.hh>
 
 #include <unistd.h>
 #include <fcntl.h>
