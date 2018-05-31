@@ -16,6 +16,7 @@
 #endif
 
 #include <stdlib.h>
+#include <errno.h>
 
 namespace ixxx {
 
