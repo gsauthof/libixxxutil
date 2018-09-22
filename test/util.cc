@@ -69,9 +69,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
           ixxx::util::FD fd(x);
           fd.set_keep_open(true);
           t = fd;
-#if (defined(__MINGW32__) || defined(__MINGW64__))
-          (void)t;
-#else
+#if !(defined(__MINGW32__) || defined(__MINGW64__))
           BOOST_CHECK(fcntl(t, F_GETFD) != -1);
 #endif
           ixxx::posix::read(fd, out, 11);
@@ -79,6 +77,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
 #if !(defined(__MINGW32__) || defined(__MINGW64__))
         BOOST_CHECK(fcntl(t, F_GETFD) != -1);
 #endif
+        ixxx::posix::close(t);
         BOOST_CHECK_EQUAL(out, "Hello World");
         boost::filesystem::remove_all(dirname);
       }
@@ -225,7 +224,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         string dname(portable_mkdtemp(dir_tpl));
         auto fns = { "12342", "abc", "xyz"};
         for (auto fn : fns)
-          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY);
+          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY, 0644);
         ixxx::util::Directory_Iterator begin(dname);
         ixxx::util::Directory_Iterator end;
         vector<string> v;
@@ -248,7 +247,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         string dname(portable_mkdtemp(dir_tpl));
         auto fns = { "12342", "abc", "xyz"};
         for (auto fn : fns)
-          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY);
+          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY, 0644);
         vector<string> v;
         for (auto &entry : boost::iterator_range<
             ixxx::util::Directory_Iterator>(
@@ -272,7 +271,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         string dname(portable_mkdtemp(dir_tpl));
         auto fns = { "12342", "abc", "xyz"};
         for (auto fn : fns)
-          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY);
+          ixxx::util::FD(dname + string("/")+ fn, O_CREAT | O_WRONLY, 0644);
         vector<string> v;
         std::for_each(
             ixxx::util::Directory_Iterator(dname),

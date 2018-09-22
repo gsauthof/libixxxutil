@@ -201,7 +201,7 @@ namespace ixxx {
     {
       if (length_) {
 #if (defined(__MINGW32__) || defined(__MINGW64__))
-        HANDLE h = reinterpret_cast<HANDLE>(_get_osfhandle(fd.get()));
+        HANDLE h = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
         if (h == INVALID_HANDLE_VALUE)
           throw std::runtime_error("mapping failed: invalid handle");
         HANDLE fm = CreateFileMapping(h, NULL,
