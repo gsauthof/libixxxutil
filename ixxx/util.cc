@@ -464,6 +464,14 @@ namespace ixxx {
       }
       return off;
     }
+    size_t write_all(int fd, const std::vector<char> &buf)
+    {
+        return write_all(fd, buf.data(), buf.size());
+    }
+    size_t write_all(int fd, const std::vector<unsigned char> &buf)
+    {
+        return write_all(fd, buf.data(), buf.size());
+    }
 
     size_t read_retry(int fd, void *buf, size_t n)
     {

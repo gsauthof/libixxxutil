@@ -13,6 +13,8 @@
 #include <deque>
 #include <memory>
 #include <iterator>
+#include <array>
+#include <vector>
 
 namespace ixxx {
 
@@ -168,9 +170,23 @@ namespace ixxx {
 
     size_t write_retry(int fd, const void *buf, size_t n);
     size_t write_all(int fd, const void *buf, size_t n);
+    size_t write_all(int fd, const std::vector<char> &buf);
+    size_t write_all(int fd, const std::vector<unsigned char> &buf);
 
     size_t read_retry(int fd, void *buf, size_t n);
     size_t read_all(int fd, void *buf, size_t n);
+    template <typename T, std::size_t N>
+        size_t read_all(int fd, std::array<T, N> &buf)
+        {
+            return read_all(fd, buf.data(), buf.size());
+        }
+    template <typename T, typename A>
+        size_t read_all(int fd, std::vector<T, A> &buf)
+        {
+            size_t r = read_all(fd, buf.data(), buf.size());
+            buf.resize(r);
+            return r;
+        }
 
   }
 
