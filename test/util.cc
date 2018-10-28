@@ -191,6 +191,25 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         boost::filesystem::remove_all(dirname);
       }
 
+      BOOST_AUTO_TEST_CASE(create_new_sync)
+      {
+        char dir_template[1024] = "ixxxutil_XXXXXX";
+        string dirname(portable_mkdtemp(dir_template));
+        string filename(dirname + "/foo");
+        {
+          const char hw[] = "Hello World";
+          auto f = ixxx::util::mmap_file(filename, false, true, sizeof(hw)-1);
+          memcpy(f.begin(), hw, sizeof(hw)-1);
+          f.sync();
+        }
+        {
+        auto f = ixxx::util::mmap_file(filename);
+        string out(f.s_begin(), f.s_end());
+        BOOST_CHECK_EQUAL(out, "Hello World");
+        }
+        boost::filesystem::remove_all(dirname);
+      }
+
       BOOST_AUTO_TEST_CASE(create_new_rw)
       {
         char dir_template[1024] = "ixxxutil_XXXXXX";

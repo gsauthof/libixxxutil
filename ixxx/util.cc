@@ -236,6 +236,30 @@ namespace ixxx {
       o.length_ = 0;
       return *this;
     }
+    void MMap::sync()
+    {
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+        // XXX windows doesn't really have a direct msync() equivalent
+        // https://stackoverflow.com/q/618046/427158
+        // > To flush all the dirty pages plus the metadata for the file and
+        // > ensure that they are physically written to disk, call
+        // > FlushViewOfFile and then call the FlushFileBuffers function.
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa366563(v=vs.85).aspx
+        auto r = FlushViewOfFile(addr_, size());
+        if (!r)
+            throw std::runtime_error("flush sync failed"); // GetLastError() -> code
+        // XXX
+#if 0
+        {
+        auto r = FlushFileBuffers(h_);
+        if (!r)
+            throw std::runtime_error("flush file buffers failed");
+        }
+#endif
+#else
+        ixxx::posix::msync(begin(), size(), MS_SYNC);
+#endif
+    }
     void MMap::unmap()
     {
       if (addr_ && length_) {

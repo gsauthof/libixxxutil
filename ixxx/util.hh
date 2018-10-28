@@ -91,6 +91,7 @@ namespace ixxx {
         MMap &operator=(MMap &&);
         MMap &operator=(const MMap &) = delete;
 
+        void sync();
         void unmap(); // allows to throw
         ~MMap();
         const unsigned char *begin() const;
