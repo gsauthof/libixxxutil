@@ -391,6 +391,8 @@ namespace ixxx {
     }
     const struct dirent *Directory::read()
     {
+      if (!dir_)
+        return nullptr;
       entry_ = ixxx::posix::readdir(dir_);
       return entry_;
     }
