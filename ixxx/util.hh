@@ -16,6 +16,8 @@
 #include <array>
 #include <vector>
 
+struct addrinfo;
+
 namespace ixxx {
 
   namespace util {
@@ -188,6 +190,23 @@ namespace ixxx {
             buf.resize(r);
             return r;
         }
+
+
+    class Getaddrinfo {
+        public:
+            Getaddrinfo(const char *node, const char *service,
+                       const struct addrinfo *hints);
+            ~Getaddrinfo();
+            Getaddrinfo(const Getaddrinfo &) =delete;
+            Getaddrinfo &operator=(const Getaddrinfo &) =delete;
+            Getaddrinfo(Getaddrinfo &&);
+            Getaddrinfo &operator=(Getaddrinfo &&);
+
+            const addrinfo *result() const { return x; }
+
+        private:
+            struct addrinfo *x {nullptr};
+    };
 
   }
 

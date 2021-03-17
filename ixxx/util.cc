@@ -5,6 +5,10 @@
 #include "util.hh"
 
 #include <ixxx/ixxx.hh>
+#include <ixxx/socket.hh>
+
+#include <netdb.h>
+
 #if (defined(__MINGW32__) || defined(__MINGW64__))
   #include <windows.h>
   // cf.
@@ -527,6 +531,31 @@ namespace ixxx {
       }
       return off;
     }
+
+
+    Getaddrinfo::Getaddrinfo(const char *node, const char *service,
+                   const struct addrinfo *hints)
+    {
+        ixxx::posix::getaddrinfo(node, service, hints, &x);
+    }
+    Getaddrinfo::~Getaddrinfo()
+    {
+        if (x)
+            freeaddrinfo(x);
+    }
+    Getaddrinfo::Getaddrinfo(Getaddrinfo &&o)
+        :
+            x(o.x)
+    {
+        o.x = nullptr;
+    }
+    Getaddrinfo &Getaddrinfo::operator=(Getaddrinfo && o)
+    {
+        x = o.x;
+        o.x = nullptr;
+        return *this;
+    }
+
 
   }
 
