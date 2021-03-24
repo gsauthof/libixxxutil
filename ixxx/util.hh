@@ -208,6 +208,8 @@ namespace ixxx {
             struct addrinfo *x {nullptr};
     };
 
+    int connect(const char *host, const char *port, const addrinfo *hints = nullptr);
+
   }
 
 }
