@@ -210,8 +210,9 @@ namespace ixxx {
 
     int connect(const char *host, const char *port, const addrinfo *hints = nullptr);
 
-  }
 
+
+  }
 }
 
 #endif

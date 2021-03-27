@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <ixxx/util.hh>
+#include <ixxx/pthread_util.hh>
 #include <ixxx/ixxx.hh>
 
 #include <unistd.h>
@@ -310,6 +311,17 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
       }
 
     BOOST_AUTO_TEST_SUITE_END() // directory
+
+
+    BOOST_AUTO_TEST_SUITE(pthread_suite)
+
+      BOOST_AUTO_TEST_CASE(basic)
+      {
+          ixxx::util::Pthread_Attr attr;
+          BOOST_CHECK(attr.ibute() != nullptr);
+      }
+
+    BOOST_AUTO_TEST_SUITE_END() // pthread_suite
 
   BOOST_AUTO_TEST_SUITE_END()
 
