@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(ixxxutil CXX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
+set(LIB_SRC ixxx/util.cc ixxx/socket.cc)
 
 # guard from super-projects, i.e. when it is added as subdirectory
 IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
@@ -17,7 +18,7 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
     REQUIRED)
 
   add_executable(ut
-    ixxx/util.cc
+    ${LIB_SRC}
     test/main.cc
     test/util.cc
     test/helper.cc
@@ -37,7 +38,6 @@ IF(${CMAKE_PROJECT_NAME} STREQUAL "ixxxutil")
 
 endif()
 
-set(LIB_SRC ixxx/util.cc)
 add_library(ixxxutil SHARED
   ${LIB_SRC}
 )

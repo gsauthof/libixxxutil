@@ -97,6 +97,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         BOOST_CHECK(fcntl(fd, F_GETFD) == -1);
         BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
         BOOST_CHECK_EQUAL(g.get(), -1);
+        boost::filesystem::remove_all(dirname);
       }
 
       BOOST_AUTO_TEST_CASE(close_because_of_move_file)
@@ -113,6 +114,7 @@ BOOST_AUTO_TEST_SUITE(ixxx_)
         BOOST_CHECK(fcntl(fd, F_GETFD) == -1);
         BOOST_CHECK(fcntl(gd, F_GETFD) != -1);
         BOOST_CHECK(g.get() == nullptr);
+        boost::filesystem::remove_all(dirname);
       }
 #endif
 
