@@ -96,10 +96,24 @@ namespace ixxx {
         void sync();
         void unmap(); // allows to throw
         ~MMap();
-        const unsigned char *begin() const;
-        const unsigned char *end() const;
-        unsigned char *begin();
-        unsigned char *end();
+
+        const unsigned char *begin() const
+        {
+          return static_cast<const unsigned char*>(addr_);
+        }
+        const unsigned char *end() const
+        {
+          return static_cast<const unsigned char*>(addr_) + length_;
+        }
+        unsigned char *begin()
+        {
+          return static_cast<unsigned char *>(addr_);
+        }
+        unsigned char *end()
+        {
+          return static_cast<unsigned char*>(addr_) + length_;
+        }
+
         const char *s_begin() const;
         const char *s_end() const;
         char *s_begin();

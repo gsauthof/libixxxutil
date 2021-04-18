@@ -284,22 +284,6 @@ namespace ixxx {
       } catch (...) {
       }
     }
-    const unsigned char *MMap::begin() const
-    {
-      return static_cast<const unsigned char*>(addr_);
-    }
-    const unsigned char *MMap::end() const
-    {
-      return static_cast<const unsigned char*>(addr_) + length_;
-    }
-    unsigned char *MMap::begin()
-    {
-      return static_cast<unsigned char *>(addr_);
-    }
-    unsigned char *MMap::end()
-    {
-      return static_cast<unsigned char*>(addr_) + length_;
-    }
     const char *MMap::s_begin() const
     {
       return static_cast<const char*>(addr_);
