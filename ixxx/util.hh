@@ -140,6 +140,7 @@ namespace ixxx {
         Directory &operator=(const Directory &) =delete;
         Directory(Directory &&);
         Directory &operator=(Directory &&);
+        operator DIR*() const;
         const struct dirent *read();
         const struct dirent &entry() const;
         void close();

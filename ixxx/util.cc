@@ -376,6 +376,10 @@ namespace ixxx {
       o.dir_ = nullptr;
       return *this;
     }
+    Directory::operator DIR*() const
+    {
+      return dir_;
+    }
     const struct dirent *Directory::read()
     {
       if (!dir_)
